@@ -88,3 +88,23 @@ export const logout = (req,res) =>{
     console.log("error in the logout controller",error.message);
   }
 };
+
+export const updateProfile = async (req,res)=>{
+  try {
+    const {profilepic} = req.body;
+    const userId = req.user._id;
+
+    if(!profilepic){
+      return res.status(400).json({message:"profilepic is required"});
+    }
+
+    const upload = await cloudinary.uploader.upload(profilepic);
+    const updateUser = await User.findByIdAndUpdate(userId,{profilepic:upload.secure_url},{new:true})
+
+    res.status(200).json({message:'profile-pic updated successfully'})
+
+  } catch (error) {
+    res.status(500).json({message:'Internal server error'})
+    console.log('update-profile controller error')
+  }
+}
