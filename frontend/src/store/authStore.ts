@@ -4,14 +4,17 @@ import { axiosInstance } from '../lib/axios';
 interface AuthState {
   authUser: any | null;
   isCheckingAuth: boolean;
+  isSigningUp: boolean;
   isLoggingIn: boolean;
   isUpdatingProfile: boolean;
   checkAuth: () => Promise<void>;
+  signUp: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   authUser: null,
   isCheckingAuth: true,
+  isSigningUp:false,
   isLoggingIn: false,
   isUpdatingProfile: false,
 
@@ -25,5 +28,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       set((state) => ({ ...state, isCheckingAuth: false }));
     }
+  },
+  signUp: async (data) => {
+
   },
 }));
