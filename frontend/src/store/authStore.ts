@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set((state) => ({ ...state, isCheckingAuth: false }));
     }
   },
-  signUp: async (data) => {
+  signUp: async () => {
 
   },
 }));
