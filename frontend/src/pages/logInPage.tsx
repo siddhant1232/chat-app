@@ -12,9 +12,14 @@ const LoginPage = () => {
   });
   const { login, isLoggingIn } = useAuthStore();
 
-  const handleSubmit = async (e) => {
+  interface FormData {
+    email: string;
+    password: string;
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    login(formData);
+    login(formData as FormData);
   };
 
   return (
