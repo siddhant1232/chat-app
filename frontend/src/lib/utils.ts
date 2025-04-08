@@ -1,6 +1,13 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+interface FormatMessageTimeOptions {
+  hour: "2-digit";
+  minute: "2-digit";
+  hour12: boolean;
+}
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+export function formatMessageTime(date: string | number | Date): string {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  } as FormatMessageTimeOptions);
 }

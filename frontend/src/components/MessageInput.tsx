@@ -5,20 +5,26 @@ import toast from "react-hot-toast";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
-  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { sendMessage } = useChatStore();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file.type.startsWith("image/")) {
+  interface FileInputEvent extends React.ChangeEvent<HTMLInputElement> {
+    target: HTMLInputElement & EventTarget;
+  }
+
+  const handleImageChange = (e: FileInputEvent) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result);
+      if (typeof reader.result === "string") {
+        setImagePreview(reader.result);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -28,14 +34,15 @@ const MessageInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSendMessage = async (e) => {
+
+  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
 
     try {
       await sendMessage({
-        text: text.trim(),
-        image: imagePreview,
+        content: imagePreview ? `${text.trim()} [Image Attached]` : text.trim(),
+        timestamp: new Date().toISOString(),
       });
 
       // Clear form
