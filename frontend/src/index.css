@@ -3,7 +3,7 @@
 @plugin "daisyui" {
   themes: all;
 }
-@custom-variant dark (&:is(.dark *));
+
 
 :root {
   --radius: 0.625rem;
