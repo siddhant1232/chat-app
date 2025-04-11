@@ -1,10 +1,14 @@
-import {create} from 'zustand';
-interface ThemeStore {
+import { create } from "zustand";
+
+interface ThemeState {
   theme: string;
   setTheme: (theme: string) => void;
 }
 
-export const useThemeStore = create<ThemeStore>((set) => ({
-  theme: "light",
-  setTheme: (theme: string) => set({ theme }),
+export const useThemeStore = create<ThemeState>((set) => ({
+  theme: localStorage.getItem("chat-theme") || "coffee",
+  setTheme: (theme: string) => {
+    localStorage.setItem("chat-theme", theme);
+    set({ theme });
+  },
 }));

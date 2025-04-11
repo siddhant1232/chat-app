@@ -5,19 +5,46 @@ import io, { type Socket } from "socket.io-client";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
+// Define types for inputs
+interface SignupData {
+  fullname: string;
+  email: string;
+  password: string;
+}
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface ProfileUpdateData {
+  fullname?: string;
+  profilepic?: string;
+  // Add more fields as needed
+}
+
+interface AuthUser {
+  _id: string;
+  email: string;
+  fullname: string;
+  profilepic: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AuthStore {
-  authUser: any; // Replace 'any' with the actual type of authUser if known
+  authUser: AuthUser | null;
   isSigningUp: boolean;
   isLoggingIn: boolean;
   isUpdatingProfile: boolean;
   isCheckingAuth: boolean;
-  onlineUsers: string[]; // Assuming onlineUsers is an array of user IDs
-  socket: SocketIOClient.Socket; 
+  onlineUsers: string[];
+  socket: SocketIOClient.Socket;
   checkAuth: () => Promise<void>;
-  signup: (data: any) => Promise<void>; // Replace 'any' with the actual type of data if known
-  login: (data: any) => Promise<void>; // Replace 'any' with the actual type of data if known
+  signup: (data: SignupData) => Promise<void>;
+  login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: any) => Promise<void>; // Replace 'any' with the actual type of data if known
+  updateProfile: (data: ProfileUpdateData) => Promise<void>;
   connectSocket: () => void;
   disconnectSocket: () => void;
 }
@@ -30,10 +57,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null as unknown as typeof Socket,
+
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
-
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error: unknown) {
@@ -44,7 +71,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  signup: async (data) => {
+  signup: async (data: SignupData) => {
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
@@ -62,13 +89,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  login: async (data) => {
+  login: async (data: LoginData) => {
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       toast.success("Logged in successfully");
-
       get().connectSocket();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {
@@ -96,7 +122,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  updateProfile: async (data) => {
+  updateProfile: async (data: ProfileUpdateData) => {
     set({ isUpdatingProfile: true });
     try {
       const res = await axiosInstance.put("/auth/update-profile", data);
@@ -124,12 +150,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     });
     socket.connect();
 
-    set({ socket: socket });
+    set({ socket });
 
     socket.on("getOnlineUsers", (userIds: string[]) => {
       set({ onlineUsers: userIds });
     });
   },
+
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
   },
