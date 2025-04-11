@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
-
-// Define or import the SendMessageData type
-export interface SendMessageData {
-  content: string;
-  timestamp?: string;
-}
 import { useAuthStore } from "./useAuthStore";
+
+// Data shape for sending a message
+export interface SendMessageData {
+  text?: string;
+  image?: string;
+}
 
 interface ChatStoreState {
   messages: any[];
@@ -35,47 +35,46 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     try {
       const res = await axiosInstance.get("/messages/users");
       set({ users: res.data });
-    } catch (error) {
-      if ((error as any).response && (error as any).response.data) {
-        if ((error as any).isAxiosError && (error as any).response && (error as any).response.data) {
-          toast.error((error as any)?.response?.data?.message || "An unexpected error occurred.");
-        } else {
-          toast.error("An unexpected error occurred.");
-        }
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
+    } catch (error: any) {
+      const message = error?.response?.data?.error || "An unexpected error occurred.";
+      toast.error(message);
     } finally {
       set({ isUsersLoading: false });
     }
   },
 
-  getMessages: async (userId: string): Promise<void> => {
+  getMessages: async (userId: string) => {
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
       set({ messages: res.data });
     } catch (error: any) {
-      if (error instanceof Error && (error as any).response?.data?.message) {
-        toast.error((error as any).response.data.message);
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
+      const message = error?.response?.data?.error || "An unexpected error occurred.";
+      toast.error(message);
     } finally {
       set({ isMessagesLoading: false });
     }
   },
-  sendMessage: async (messageData: SendMessageData): Promise<void> => {
+
+  sendMessage: async (messageData: SendMessageData) => {
     const { selectedUser, messages } = get();
+
+    if (!selectedUser?._id) {
+      toast.error("No user selected to send the message to.");
+      return;
+    }
+    if (!messageData.text && !messageData.image) {
+      toast.error("Please enter a message or attach an image.");
+      return;
+    }
+
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
       set({ messages: [...messages, res.data] });
-    } catch (error) {
-      if (error instanceof Error && (error as any).response?.data?.message) {
-        toast.error((error as any).response.data.message);
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
+      console.log("🔥 messageData before sending:", messageData);
+    } catch (error: any) {
+      const message = error?.response?.data?.error || "An unexpected error occurred.";
+      toast.error(message);
     }
   },
 
@@ -83,15 +82,12 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     const { selectedUser } = get();
     if (!selectedUser) return;
 
-    const socket = useAuthStore.getState().socket as SocketIOClient.Socket; // Ensure the type is explicitly defined
+    const socket = useAuthStore.getState().socket;
+    socket.on("newMessage", (newMessage: { senderId: string }) => {
+      const isFromSelectedUser = newMessage.senderId === selectedUser._id;
+      if (!isFromSelectedUser) return;
 
-    socket.on("newMessage", (newMessage: { senderId: string; content: string; timestamp: string }) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === (selectedUser as { _id: string })._id;
-      if (!isMessageSentFromSelectedUser) return;
-
-      set({
-      messages: [...get().messages, newMessage],
-      });
+      set({ messages: [...get().messages, newMessage] });
     });
   },
 

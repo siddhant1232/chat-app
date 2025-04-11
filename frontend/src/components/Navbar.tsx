@@ -8,14 +8,14 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-base-100 border-b border-base-300 fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-base-100/80">
+    <header className="border-b border-base-300 fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-base-100/80">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
           <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
             <MessageSquare className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-lg font-bold">Chatty</span>
+          <span className="text-lg font-bold">WhatsWeb</span>
         </Link>
 
         {/* Desktop Actions */}
