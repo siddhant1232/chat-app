@@ -1,16 +1,14 @@
 {
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+  ],
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@pages/*": ["./pages/*"]
-    },
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "strict": true,
-    "jsx": "preserve",
-    "types": ["vite/client"]
-  },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+    }
+  }
 }
