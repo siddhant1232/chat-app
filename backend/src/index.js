@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://chat-app-1-flame.vercel.app/",
+    origin: "https://chat-app-1-flame.vercel.app",
     credentials: true,
   })
 );
