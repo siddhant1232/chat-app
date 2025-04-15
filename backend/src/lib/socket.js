@@ -8,7 +8,7 @@ export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: [
-        "https://chat-app-1-flame.vercel.app",
+        "https://chat-app-1-yoha.onrender.com",
         "http://localhost:5173"
       ],
       credentials: true,

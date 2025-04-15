@@ -13,6 +13,8 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Use Render's port or fallback to 5001
 const PORT = process.env.PORT || 5001;
 
 // Initialize Socket.IO
@@ -25,10 +27,12 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "https://chat-app-1-flame.vercel.app",
+      "https://chat-app-1-yoha.onrender.com",
       "http://localhost:5173"
     ],
-    credentials: true,
+    credentials: true, // Important for cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 
@@ -36,7 +40,13 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-server.listen(PORT, () => {
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
+// Start server
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on PORT: ${PORT}`);
   connectDB();
 });
