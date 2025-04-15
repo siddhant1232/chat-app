@@ -2,7 +2,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.models.js";
 import cloudinary from "../lib/cloudinary.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
+import { getReceiverSocketId } from "../lib/socket.js";
 import fs from "fs/promises";
 
 export const getUsersForSidebar = async (req, res) => {
@@ -74,6 +74,7 @@ export const sendMessage = async (req, res) => {
     const newMessage = await Message.create(messageData);
 
     // Real-time update
+    const io = getIO();
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
@@ -84,6 +85,8 @@ export const sendMessage = async (req, res) => {
     if (senderSocketId && senderSocketId !== req.socket.id) {
       io.to(senderSocketId).emit("newMessage", newMessage);
     }
+
+    
 
     res.status(201).json(newMessage);
   } catch (error) {

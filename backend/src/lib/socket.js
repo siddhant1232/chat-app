@@ -1,32 +1,33 @@
 // src/lib/socket.js
 import { Server } from "socket.io";
 
+let io = null;
+const userSocketMap = {}; // { userId: socketId }
+
 export const initializeSocket = (server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: [
         "https://chat-app-1-flame.vercel.app",
-        "http://localhost:5173" // For local development
+        "http://localhost:5173"
       ],
       credentials: true,
     },
   });
 
-  const userSocketMap = {};
-
-  const getReceiverSocketId = (userId) => userSocketMap[userId];
-
   io.on("connection", (socket) => {
-    const userId = socket.handshake.query.userId;
-    console.log("User connected:", socket.id, "as", userId);
+    console.log("A user connected", socket.id);
 
-    if (userId) {
+    const userId = socket.handshake.query.userId;
+    if (userId && userId !== "undefined") {
       userSocketMap[userId] = socket.id;
-      io.emit("getOnlineUsers", Object.keys(userSocketMap));
     }
 
+    // Send online users to all connected clients
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
     socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
+      console.log("User disconnected", socket.id);
       if (userId) {
         delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
@@ -34,5 +35,14 @@ export const initializeSocket = (server) => {
     });
   });
 
-  return { io, getReceiverSocketId };
+  return io;
+};
+
+export const getReceiverSocketId = (userId) => {
+  return userSocketMap[userId];
+};
+
+export const getIO = () => {
+  if (!io) throw new Error("Socket.io not initialized!");
+  return io;
 };

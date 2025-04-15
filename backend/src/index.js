@@ -1,3 +1,4 @@
+// src/index.js
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -15,8 +16,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 
 // Initialize Socket.IO
-const { io, getReceiverSocketId } = initializeSocket(server);
-export { getReceiverSocketId }; // Export if needed elsewhere
+initializeSocket(server);
 
 // Middleware
 app.use(express.json());
@@ -26,7 +26,7 @@ app.use(
   cors({
     origin: [
       "https://chat-app-1-flame.vercel.app",
-      "http://localhost:5173" // For local development
+      "http://localhost:5173"
     ],
     credentials: true,
   })
