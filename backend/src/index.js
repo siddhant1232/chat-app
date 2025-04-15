@@ -28,7 +28,7 @@ app.use(
   cors({
     origin: [
       "https://chat-app-1-yoha.onrender.com",
-      "http://localhost:5173"
+      "http://localhost:5174"
     ],
     credentials: true, // Important for cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE'],

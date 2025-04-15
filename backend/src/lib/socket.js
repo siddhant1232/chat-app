@@ -1,4 +1,3 @@
-// src/lib/socket.js
 import { Server } from "socket.io";
 
 let io = null;
@@ -9,10 +8,12 @@ export const initializeSocket = (server) => {
     cors: {
       origin: [
         "https://chat-app-1-yoha.onrender.com",
-        "http://localhost:5173"
+        "http://localhost:5174"
       ],
       credentials: true,
     },
+    pingTimeout: 60000, // 60 seconds
+    pingInterval: 25000, // 25 seconds
   });
 
   io.on("connection", (socket) => {
@@ -25,6 +26,19 @@ export const initializeSocket = (server) => {
 
     // Send online users to all connected clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    // Handle new message events
+    socket.on("sendMessage", (message) => {
+      const receiverSocketId = getReceiverSocketId(message.receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", message);
+      }
+      // Also send back to sender's other devices
+      const senderSocketId = getReceiverSocketId(message.senderId);
+      if (senderSocketId && senderSocketId !== socket.id) {
+        io.to(senderSocketId).emit("newMessage", message);
+      }
+    });
 
     socket.on("disconnect", () => {
       console.log("User disconnected", socket.id);
