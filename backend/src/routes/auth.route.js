@@ -1,3 +1,4 @@
+// src/routes/auth.route.js
 import express from 'express';
 import {  signin, signup,logout,updateProfile ,checkAuth} from '../controllers/auth.controllers.js';
 import { privateRoute } from '../middlewares/auth.middleware.js';

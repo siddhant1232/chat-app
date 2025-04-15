@@ -1,3 +1,4 @@
+// src/middlewares/auth.middleware.js
 import jwt from "jsonwebtoken";
 const {verify} = jwt
 import User from "../models/user.model.js";
