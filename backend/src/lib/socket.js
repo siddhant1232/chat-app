@@ -1,38 +1,38 @@
 // src/lib/socket.js
 import { Server } from "socket.io";
-import http from "http";
-import express from "express";
 
-const app = express();
-const server = http.createServer(app);
+export const initializeSocket = (server) => {
+  const io = new Server(server, {
+    cors: {
+      origin: [
+        "https://chat-app-1-flame.vercel.app",
+        "http://localhost:5173" // For local development
+      ],
+      credentials: true,
+    },
+  });
 
-const io = new Server(server, {
-  cors: {
-    origin: "http://https://chat-app-1-flame.vercel.app",
-    credentials: true,
-  },
-});
+  const userSocketMap = {};
 
-const userSocketMap = {};
+  const getReceiverSocketId = (userId) => userSocketMap[userId];
 
-export const getReceiverSocketId = (userId) => userSocketMap[userId];
+  io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
+    console.log("User connected:", socket.id, "as", userId);
 
-io.on("connection", (socket) => {
-  const userId = socket.handshake.query.userId;
-  console.log("User connected:", socket.id, "as", userId);
-
-  if (userId) {
-    userSocketMap[userId] = socket.id;
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-  }
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
     if (userId) {
-      delete userSocketMap[userId];
+      userSocketMap[userId] = socket.id;
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     }
-  });
-});
 
-export { io, app, server };
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+      if (userId) {
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+      }
+    });
+  });
+
+  return { io, getReceiverSocketId };
+};
